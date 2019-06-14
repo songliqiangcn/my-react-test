@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import './App.css';
 
-const MAX_QUEUE = 5;
+const MAX_QUEUE = 10;
 const API_PATH = 'https://api.tradypik.com.au/api/v1/my_test';
 
 
