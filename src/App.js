@@ -3,31 +3,7 @@ import axios from 'axios';
 import './App.css';
 
 const MAX_QUEUE = 5;
-const API_PATH = 'https://api.tradypik.com.au/api/v1/react';
-
-/*
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
-export default App;
-*/
+const API_PATH = 'https://api.tradypik.com.au/api/v1/my_test';
 
 
 class App extends Component {
@@ -55,7 +31,7 @@ class App extends Component {
   }
 
   onRequestSubmit(event) {
-      const { queueActivate, totalCounnter, requestQueue } = this.state;
+      const { totalCounnter, requestQueue } = this.state;
 
       var counter = totalCounnter + 1;
       var sendRequestKey = Date.now().toString() + '_' + counter.toString();
@@ -71,7 +47,7 @@ class App extends Component {
   }
 
   componentDidUpdate(){
-      const { queueActivate, totalCounnter, requestQueue, results } = this.state;
+      const { queueActivate, requestQueue } = this.state;
 
       var queueLength = requestQueue ? requestQueue.length : 0;
 
