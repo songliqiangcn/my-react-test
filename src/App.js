@@ -16,7 +16,6 @@ class App extends Component {
 
     this.state = {
       queueActivate: false,
-      totalCounnter: 0,
       requestQueue: null,
       results: [],
       error: null,
@@ -35,17 +34,17 @@ class App extends Component {
   }
 
   onRequestSubmit(event) {
-      const { queueActivate, totalCounnter, requestQueue } = this.state;
+      const { queueActivate, requestQueue } = this.state;
 
-      var counter        = totalCounnter + 1;
-      var sendRequestKey = Date.now().toString() + '_' + counter.toString();
+      var rand           = Math.floor(Math.random() * 9) + 1;
+      var sendRequestKey = Date.now().toString() + rand.toString();
       var oldQueue       = requestQueue ? requestQueue : [];
 
       var updateQueue = [
           ...oldQueue,
           sendRequestKey
       ];
-      this.setState({ totalCounnter: counter, requestQueue : updateQueue });
+      this.setState({ requestQueue : updateQueue });
 
       // send request ?
       var queueLength = updateQueue.length;
