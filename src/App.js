@@ -2,6 +2,10 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import './App.css';
 
+import Table from './components/Table';
+import RequestForm from './components/RequestForm';
+
+
 const MAX_QUEUE = 10;
 const API_PATH = 'https://api.tradypik.com.au/api/v1/my_test';
 
@@ -19,10 +23,10 @@ class App extends Component {
       isLoading : false
     };
 
-    this.onQueueChange = this.onQueueChange.bind(this);
+    this.onQueueChange   = this.onQueueChange.bind(this);
     this.onRequestSubmit = this.onRequestSubmit.bind(this);
-    this.sendRequest = this.sendRequest.bind(this);
-    this.setResponse = this.setResponse.bind(this);
+    this.sendRequest     = this.sendRequest.bind(this);
+    this.setResponse     = this.setResponse.bind(this);
 
   }
 
@@ -31,11 +35,11 @@ class App extends Component {
   }
 
   onRequestSubmit(event) {
-      const { totalCounnter, requestQueue } = this.state;
+      const { queueActivate, totalCounnter, requestQueue } = this.state;
 
-      var counter = totalCounnter + 1;
+      var counter        = totalCounnter + 1;
       var sendRequestKey = Date.now().toString() + '_' + counter.toString();
-      var oldQueue = requestQueue ? requestQueue : [];
+      var oldQueue       = requestQueue ? requestQueue : [];
 
       var updateQueue = [
           ...oldQueue,
@@ -43,31 +47,29 @@ class App extends Component {
       ];
       this.setState({ totalCounnter: counter, requestQueue : updateQueue });
 
+      // send request ?
+      var queueLength = updateQueue.length;
+      if (queueActivate) {
+        if (queueLength >= MAX_QUEUE) {
+            for (var i = 0; i < queueLength; i++) {
+                this.sendRequest(updateQueue[i]);
+            }              
+        }
+      } else {
+          if (queueLength > 0) {
+            for (var j = 0; j < queueLength; j++) {
+              this.sendRequest(updateQueue[j]);
+            }
+          }
+      }
+
+      //console.log(JSON.stringify(updateQueue, null, 2))
+
+
       event.preventDefault();
   }
 
-  componentDidUpdate(){
-      const { queueActivate, requestQueue } = this.state;
-
-      var queueLength = requestQueue ? requestQueue.length : 0;
-
-      if (queueActivate) {
-          if (queueLength >= MAX_QUEUE) {
-              for (var i = 0; i < queueLength; i++) {
-                  this.sendRequest(requestQueue[i]);
-              }
-              this.setState({ requestQueue: null });
-          }
-      } else {
-          if (queueLength > 0) {
-              this.sendRequest(requestQueue[0]);
-              this.setState({ requestQueue: null });
-          }
-      }
-  }
-
   sendRequest(sendRequestKey) {
-
       const requestKey = sendRequestKey
 
       this.setState({ isLoading: true });
@@ -84,9 +86,10 @@ class App extends Component {
           newRes
       ];
 
-      console.log(JSON.stringify(updateRes, null, 2))
+      // remove the queue item
+      const updatedQueue = this.state.requestQueue.filter(item => item !== key);
 
-      this.setState({ results: updateRes , isLoading : false });
+      this.setState({ results: updateRes , requestQueue: updatedQueue, isLoading : false });
   }
 
 
@@ -99,16 +102,21 @@ class App extends Component {
       return (
           <div className="page">
               <div className="interactions">
-              <Request
+              <RequestForm
                   queueActivate={this.state.queueActivate}
                   onChange={this.onQueueChange}
                   onSubmit={this.onRequestSubmit}
               >
                   Send Request
-              </Request>
+              </RequestForm>
               </div>
-              <Loading isLoading={this.state.isLoading} />
-              <QueueNotice queueLength={queueLength} />
+              <div className="queue_notice">Total <strong>{queueLength}</strong> items in request queue now.</div>
+              {
+                this.state.isLoading 
+                ? <div>Loading ...</div>
+                : ''
+
+              }
               { error
               ? <div className="interactions">
                   <p>Something went wrong.</p>
@@ -122,60 +130,5 @@ class App extends Component {
   }
 }
 
-const Table = ({
-    list
-}) => 
-<div className="table">
-  <div className="table-header">
-  <span style={{ width: '50%' }}>Request Key</span>
-  <span style={{ width: '50%' }}>API Response</span>
-  </div>
-  {list.map(item =>
-        <div key={item.requestKey} className="table-row">
-          <span style={{ width: '50%' }}>
-            {item.requestKey}
-          </span>
-          <span style={{ width: '50%' }}>
-            {item.response}
-          </span>
-          
-        </div>
-      )}  
-</div>
-
-const QueueNotice = ({queueLength}) =>
-<div className="queue_notice">Total {queueLength} items in request queue now.</div>
-
-
-const Loading = ({isLoading}) =>
-isLoading ? 
-<div>Loading ...</div>
-: ''
-
-const Request = ({
-  queueActivate,
-  onChange,
-  onSubmit,
-  children
-}) =>
-  <form onSubmit={onSubmit}>
-      <input
-          type="checkbox"
-          checked={queueActivate}
-          onChange={onChange}
-      />
-      Toggle Queue   
-    <button type="submit">
-      {children}
-    </button>
-  </form>
-
-
 export default App;
 
-export {
-  Request,
-  Table,
-  Loading,
-  QueueNotice
-};
